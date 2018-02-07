@@ -1,0 +1,133 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 49.9667
+  longitude: 17.7833
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 347
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/Prague
+  # Customization file
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+introduction:
+
+# Enables the frontend
+frontend:
+
+# Enables configuration UI
+config:
+
+http:
+  # Secrets are defined in the file secrets.yaml
+  # api_password: !secret http_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+# Track the sun
+sun:
+
+# Weather prediction
+sensor:
+  - platform: yr
+
+# Text to speech
+tts:
+  - platform: google
+
+# Cloud
+#cloud:
+mqtt:
+  broker: 127.0.0.1
+
+light:
+  - platform: mqtt
+    name: "Office Light RGB"
+    state_topic: "office/rgb1/light/status"
+    command_topic: "office/rgb1/light/switch"
+    brightness_state_topic: "office/rgb1/brightness/status"
+    brightness_command_topic: "office/rgb1/brightness/set"
+    rgb_state_topic: "office/rgb1/rgb/status"
+    rgb_command_topic: "office/rgb1/rgb/set"
+    state_value_template: "{{ value_json.state }}"
+    brightness_value_template: "{{ value_json.brightness }}"
+    rgb_value_template: "{{ value_json.rgb | join(',') }}"
+    qos: 0
+    payload_on: "ON"
+    payload_off: "OFF"
+    optimistic: false
+input_number:
+    teplota_den:
+        name: Teplota Den
+        min: 16
+        max: 22
+        step : 0.5
+        unit_of_measurement: °C
+        icon: mdi:thermometer-lines
+input_select:
+  current_theme:
+    name: 'Current Theme'
+    options:
+     - 'default'
+     - 'teal'
+     - 'darkorange'
+     - 'darkred'
+     - 'darkcyan'
+    initial: 'default'
+    icon: 'mdi:palette'
+automation:
+  - alias: 'Set noc'
+    trigger:
+      platform: state
+      entity_id: input_number.teplota_den
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: 'setTemperature'
+        retain: true
+        payload: "{{ states('input_number.teplota_den')}}"
+
+  - id: change_current_theme
+    alias: 'Change Current Theme'
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: input_select.current_theme
+    action:
+      - service: frontend.set_theme
+        data_template:
+          name: '{{states.input_select.current_theme.state}}'
+
+group: !include groups.yaml
+#automation: !include automations.yaml
+script: !include scripts.yaml
+frontend: !include frontend.yaml
+

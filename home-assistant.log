@@ -1,0 +1,2 @@
+2018-02-07 09:29:13 ERROR (Thread-2) [homeassistant.util.yaml] YAML file /home/student/.homeassistant/configuration.yaml contains duplicate key "frontend". Check lines 19 and 131.
+2018-02-07 09:29:13 WARNING (MainThread) [homeassistant.components.sensor.yr] Retrying in 15 minutes: Cannot connect to host aa015h6buqvih86i1.api.met.no:443 ssl:True [Connect call failed ('157.249.177.128', 443)]
